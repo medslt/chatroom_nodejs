@@ -15,6 +15,10 @@
   },  
   "author": "Mohamed SALAMAT",
   "email": "mohamed8salamat@gmail.com",
-  "license": "free"
+  "license": "free",
+  "scripts": {
+  "start": "supervisor server.js"
+  },
+  "main": "server.js"
 
 }
