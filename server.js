@@ -1,3 +1,10 @@
+/*
+* By: Mohamed salamat
+* @ : mohamed8salamat@gmail.com
+* github: medslt
+* 05/2015
+**/
+
 var express = require('express')
 , app = express()
 , server = require('http').createServer(app)
@@ -45,40 +52,16 @@ var chatHistory = {};
 
 function purge(s, action) {
 	/*
-	The action will determine how we deal with the room/user removal.
-	These are the following scenarios:
-	if the user is the owner and (s)he:
-		1) disconnects (i.e. leaves the whole server)
-			- advise users
-		 	- delete user from people object
-			- delete room from rooms object
-			- delete chat history
-			- remove all users from room that is owned by disconnecting user
-		2) removes the room
-			- same as above except except not removing user from the people object
-		3) leaves the room
-			- same as above
-	if the user is not an owner and (s)he's in a room:
-		1) disconnects
-			- delete user from people object
-			- remove user from room.people object
-		2) removes the room
-			- produce error message (only owners can remove rooms)
-		3) leaves the room
-			- same as point 1 except not removing user from the people object
-	if the user is not an owner and not in a room:
-		1) disconnects
-			- same as above except not removing user from room.people object
-		2) removes the room
-			- produce error message (only owners can remove rooms)
-		3) leaves the room
-			- n/a
+	cette fonction permet :
+	 1- à un utilisateur de  quitter un chatroom
+	 2- ou supprimer un chatroom
+	
 	*/
-	if (people[s.id].inroom) { //user is in a room
-		var room = rooms[people[s.id].inroom]; //check which room user is in.
-		if (s.id === room.owner) { //user in room and owns room
+	if (people[s.id].inroom) { //l'utilisateur appertient à un chatroom
+		var room = rooms[people[s.id].inroom]; //recupérer ce chatroom.
+		if (s.id === room.owner) { //vérifier si il est  le propriétaire de ce chatroom
 			if (action === "disconnect") {
-				io.sockets.in(s.room).emit("update", "The owner (" +people[s.id].name + ") has left the server. The room is removed and you have been disconnected from it as well.");
+				io.sockets.in(s.room).emit("update", "L'admin (" +people[s.id].name + ") s'est déconnecté du serveur. Ce chatroom est supprimé et vous vous etes déconnecté.");
 				var socketids = [];
 				for (var i=0; i<sockets.length; i++) {
 					socketids.push(sockets[i].id);
@@ -92,18 +75,18 @@ function purge(s, action) {
 						people[room.people[i]].inroom = null;
 					}
 				}
-				room.people = _.without(room.people, s.id); //remove people from the room:people{}collection
-				delete rooms[people[s.id].owns]; //delete the room
-				delete people[s.id]; //delete user from people collection
-				delete chatHistory[room.name]; //delete the chat history
+				room.people = _.without(room.people, s.id); //Supprimer les user de ce chatroom
+				delete rooms[people[s.id].owns]; //supprimer le chatroom
+				delete people[s.id]; //supprimer le user
+				delete chatHistory[room.name]; //supprimer l'historiquehistorique du chatroom
 				sizePeople = _.size(people);
 				sizeRooms = _.size(rooms);
 				io.sockets.emit("update-people", {people: people, count: sizePeople});
 				io.sockets.emit("roomList", {rooms: rooms, count: sizeRooms});
 				var o = _.findWhere(sockets, {'id': s.id});
 				sockets = _.without(sockets, o);
-			} else if (action === "removeRoom") { //room owner removes room
-				io.sockets.in(s.room).emit("update", "The owner (" +people[s.id].name + ") has removed the room. The room is removed and you have been disconnected from it as well.");
+			} else if (action === "removeRoom") { //supprimer un chatroom
+				io.sockets.in(s.room).emit("update", "L'admin (" +people[s.id].name + ") a supprimé ce chatroom. Vous êtes déconnecté.");
 				var socketids = [];
 				for (var i=0; i<sockets.length; i++) {
 					socketids.push(sockets[i].id);
@@ -119,12 +102,12 @@ function purge(s, action) {
 				}
 				delete rooms[people[s.id].owns];
 				people[s.id].owns = null;
-				room.people = _.without(room.people, s.id); //remove people from the room:people{}collection
-				delete chatHistory[room.name]; //delete the chat history
+				room.people = _.without(room.people, s.id); //supprimer les user de ce chatroom
+				delete chatHistory[room.name]; //supprimer l'héstory du chatroom
 				sizeRooms = _.size(rooms);
 				io.sockets.emit("roomList", {rooms: rooms, count: sizeRooms});
-			} else if (action === "leaveRoom") { //room owner leaves room
-				io.sockets.in(s.room).emit("update", "The owner (" +people[s.id].name + ") has left the room. The room is removed and you have been disconnected from it as well.");
+			} else if (action === "leaveRoom") { //l'admin quitte le chatroom
+				io.sockets.in(s.room).emit("update", "L'admin (" +people[s.id].name + ") s'est déconnecté. Ce chatroom est supprimé et vous êtes déconnecté.");
 				var socketids = [];
 				for (var i=0; i<sockets.length; i++) {
 					socketids.push(sockets[i].id);
@@ -140,14 +123,14 @@ function purge(s, action) {
 				}
 				delete rooms[people[s.id].owns];
 				people[s.id].owns = null;
-				room.people = _.without(room.people, s.id); //remove people from the room:people{}collection
-				delete chatHistory[room.name]; //delete the chat history
+				room.people = _.without(room.people, s.id); //supprimer les user de ce chatroom
+				delete chatHistory[room.name]; //supprimer l'héstory du chatroom
 				sizeRooms = _.size(rooms);
 				io.sockets.emit("roomList", {rooms: rooms, count: sizeRooms});
 			}
-		} else {//user in room but does not own room
+		} else {//user qui n'est pas l'admin
 			if (action === "disconnect") {
-				io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
+				io.sockets.emit("update", people[s.id].name + " s'est déconnecté du serveur.");
 				if (_.contains((room.people), s.id)) {
 					var personIndex = room.people.indexOf(s.id);
 					room.people.splice(personIndex, 1);
@@ -159,21 +142,21 @@ function purge(s, action) {
 				var o = _.findWhere(sockets, {'id': s.id});
 				sockets = _.without(sockets, o);
 			} else if (action === "removeRoom") {
-				s.emit("update", "Only the owner can remove a room.");
+				s.emit("update", "Vous ne poouvez pas supprimer ce chatroom, vous n'êstes pas admin.");
 			} else if (action === "leaveRoom") {
 				if (_.contains((room.people), s.id)) {
 					var personIndex = room.people.indexOf(s.id);
 					room.people.splice(personIndex, 1);
 					people[s.id].inroom = null;
-					io.sockets.emit("update", people[s.id].name + " has left the room.");
+					io.sockets.emit("update", people[s.id].name + " a quitté le chatroom.");
 					s.leave(room.name);
 				}
 			}
 		}	
 	} else {
-		//The user isn't in a room, but maybe he just disconnected, handle the scenario:
+		
 		if (action === "disconnect") {
-			io.sockets.emit("update", people[s.id].name + " has disconnected from the server.");
+			io.sockets.emit("update", people[s.id].name + " s'est déconnecté du serveur.");
 			delete people[s.id];
 			sizePeople = _.size(people);
 			io.sockets.emit("update-people", {people: people, count: sizePeople});
@@ -287,7 +270,7 @@ io.sockets.on("connection", function (socket) {
 					chatHistory[socket.room].push(people[socket.id].name + ": " + msg);
 				}
 		    	} else {
-				socket.emit("update", "veuillez  connecter à une chatroom SVP.");
+				socket.emit("update", "veuillez vous connecter à une chatroom SVP.");
 		    	}
 		}
 	});
@@ -318,11 +301,11 @@ io.sockets.on("connection", function (socket) {
 			people[socket.id].owns = id;
 			people[socket.id].inroom = id;
 			room.addPerson(socket.id);
-			socket.emit("update", "Welcome to " + room.name + ".");
+			socket.emit("update", "Bienvenue dans :" + room.name + ".");
 			socket.emit("sendRoomID", {id: id});
 			chatHistory[socket.room] = [];
 		} else {
-			socket.emit("update", "You have already created a room.");
+			socket.emit("update", "Vous avez déjà créé un chatroom.");
 		}
 	});
 
@@ -340,7 +323,7 @@ io.sockets.on("connection", function (socket) {
 		 if (socket.id === room.owner) {
 			purge(socket, "removeRoom");
 		} else {
-                	socket.emit("update", "Only the owner can remove a room.");
+                	socket.emit("update", "Vous ne pouvez pas supprimer ce chatroom, vous n'êtes pas un admin.");
 		}
 	});
 
@@ -348,21 +331,21 @@ io.sockets.on("connection", function (socket) {
 		if (typeof people[socket.id] !== "undefined") {
 			var room = rooms[id];
 			if (socket.id === room.owner) {
-				socket.emit("update", "You are the owner of this room and you have already been joined.");
+				socket.emit("update", "Vous êtes l'admin de ce chatroom, vous êtes déjà ajouté.");
 			} else {
 				if (_.contains((room.people), socket.id)) {
-					socket.emit("update", "You have already joined this room.");
+					socket.emit("update", "Vous êtes déjà connecté à ce chatroom.");
 				} else {
 					if (people[socket.id].inroom !== null) {
-				    		socket.emit("update", "You are already in a room ("+rooms[people[socket.id].inroom].name+"), please leave it first to join another room.");
+				    		socket.emit("update", "Vous êtes déjà connecté à ce chatroom ("+rooms[people[socket.id].inroom].name+"), SVP deconnectez-vous pour pouvoir vous connecter à un autre chatroom.");
 				    	} else {
 						room.addPerson(socket.id);
 						people[socket.id].inroom = id;
 						socket.room = room.name;
 						socket.join(socket.room);
 						user = people[socket.id];
-						io.sockets.in(socket.room).emit("update", user.name + " has connected to " + room.name + " room.");
-						socket.emit("update", "Welcome to " + room.name + ".");
+						io.sockets.in(socket.room).emit("update", user.name + " s'est connecté au chatroom : " + room.name + ".");
+						socket.emit("update", "Bienvenue dans : " + room.name + ".");
 						socket.emit("sendRoomID", {id: id});
 						var keys = _.keys(chatHistory);
 						if (_.contains(keys, socket.room)) {
@@ -372,7 +355,7 @@ io.sockets.on("connection", function (socket) {
 				}
 			}
 		} else {
-			socket.emit("update", "Please enter a valid name first.");
+			socket.emit("update", "Veuillez entrer un nom valide SVP.");
 		}
 	});
 

@@ -1,7 +1,7 @@
 # chatroom nodejs ;) 
-# moahmed.salamat@gmail.com
+# mohamed8salamat@gmail.com
 
-## Libraries used
+## Libraries utilisées 
 <ul>
   <li>node.js / npm</li>
   <li>socket.io</li>
@@ -11,19 +11,26 @@
   <li>ejs</li>
 </ul>
 
-# Functionality
+# Fonctionnalités
 <ul>
-  <li>People are able to join the chat server after entering their names</li>
-  <li>Usernames are unique - if a username is taken, a new suggestion is generated</li>
-  <li>User agent and geo location are both detected</li>
-  <li>People can setup a room. Room names are unique. One person can create on room and join one room</li>
-  <li>Users have to join a room to chat, except for the whisper feature.</li>
-  <li>Whisper messages are private messages sent between two users</li>
-  <li>With a WebSpeech enabled browsers, users can record their messages</li>
-  <li>Users can leave a room and/or disconnect from the server anytime</li>
-  <li><strong>New:</strong> People joining the room will see the past 10 messages (chat history).</li>
-  <li><strong>New:</strong> People will see an 'is typing' message when someone is typing a message.</li>
+  <li>Connecter avec un username</li>
+  <li>Le username est unique - sinon une suggestion d'un autre username</li>
+  <li>Détecter la localisation de l'utilisateur</li>
+  <li>Un utilisateur peut créer un chatroom avec un nom unique</li>
+  <li>Les utilisateurs peuvent rejoindre un chatroom.</li>
+  <li>Un chat privé entre 2 utilisateurs</li>  
+  <li>Quitter un chatroom</li>
+  <li>Afficher l'historique d'un chatroom (les 10 derniers msg).</li>
+  <li>Afficher les noms des utilisateurs qui sont entrain d'écrir </li>
 </ul>
+
+#Insttalation et Exécution sur Linux
+1. Installer NodeJS et npm
+2. Executer 'sudo npm install -d' pour insttaler tout ce qu'il faut du package.json
+3. Executer le serveur   'sudo node app.js'
+
+4. Le serveur est éxecuté sur le port 3000 (ex : http://localhost:3000/)
+
 
 
 

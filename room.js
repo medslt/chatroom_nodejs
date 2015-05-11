@@ -1,3 +1,9 @@
+/*
+* By: Mohamed salamat
+* @ : mohamed8salamat@gmail.com
+* github: medslt
+* 05/2015
+**/
 function Room(name, id, owner) {
   this.name = name;
   this.id = id;

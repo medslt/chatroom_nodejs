@@ -11,24 +11,10 @@
     "npid": "~0.4.0",
     "socket.io": "~0.9.16",
     "shrinkwrap": "~0.0.3",
-    "underscore": "~1.5.2",
-    "bower": "~1.2.8"
-  },
-  "devDependencies": {},
-  "scripts": {
-    "postinstall": "./node_modules/bower/bin/bower install",
-    "start": "node server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/satrapade/advanced-chat.git"
-  },
-  "author": "Tamas Piros",
-  "url": "http://tamas.io",
-  "email": "me@tamas.io",
-  "license": "free",
-  "bugs": {
-    "url": "https://github.com/satrapade/advanced-chat/issues"
-  },
-  "homepage": "https://github.com/satrapade/advanced-chat"
+    "underscore": "~1.5.2"    
+  },  
+  "author": "Mohamed SALAMAT",
+  "email": "mohamed8salamat@gmail.com",
+  "license": "free"
+
 }

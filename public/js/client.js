@@ -1,59 +1,16 @@
-/* HTML5 magic
+/*
+* By: Mohamed salamat
+* @ : mohamed8salamat@gmail.com
+* github: medslt
+* 05/2015
+**/
+/* HTML5 
 - GeoLocation
-- WebSpeech
 */
 
-//WebSpeech API
-var final_transcript = '';
-var recognizing = false;
-var last10messages = []; //to be populated later
-
-if (!('webkitSpeechRecognition' in window)) {
-  console.log("webkitSpeechRecognition is not available");
-} else {
-  var recognition = new webkitSpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-
-  recognition.onstart = function() {
-    recognizing = true;
-  };
-
-  recognition.onresult = function(event) {
-    var interim_transcript = '';
-    for (var i = event.resultIndex; i < event.results.length; ++i) {
-      if (event.results[i].isFinal) {
-        final_transcript += event.results[i][0].transcript;
-        $('#msg').addClass("final");
-        $('#msg').removeClass("interim");
-      } else {
-        interim_transcript += event.results[i][0].transcript;
-        $("#msg").val(interim_transcript);
-        $('#msg').addClass("interim");
-        $('#msg').removeClass("final");
-      }
-    }
-    $("#msg").val(final_transcript);
-    };
-  }
-
-  function startButton(event) {
-    if (recognizing) {
-      recognition.stop();
-      recognizing = false;
-      $("#start_button").prop("value", "Record");
-      return;
-    }
-    final_transcript = '';
-    recognition.lang = "en-GB"
-    recognition.start();
-    $("#start_button").prop("value", "Recording ... Click to stop.");
-    $("#msg").val();
-  }
-//end of WebSpeech
 
 /*
-Functions
+Fonctions
 */
 function toggleNameForm() {
    $("#login-screen").toggle();
@@ -63,7 +20,7 @@ function toggleChatWindow() {
   $("#main-chat-screen").toggle();
 }
 
-// Pad n to specified size by prepending a zeros
+
 function zeroPad(num, size) {
   var s = num + "";
   while (s.length < size)
@@ -71,7 +28,7 @@ function zeroPad(num, size) {
   return s;
 }
 
-// Format the time specified in ms from 1970 into local HH:MM:SS
+//Le format du temps à afficher HH:MM:SS
 function timeFormat(msTime) {
   var d = new Date(msTime);
   return zeroPad(d.getHours(), 2) + ":" +
@@ -80,7 +37,7 @@ function timeFormat(msTime) {
 }
 
 $(document).ready(function() {
-  //setup "global" variables first
+  // variables globales
   var socket = io.connect("127.0.0.1:3000");
   var myRoomID = null;
 
@@ -103,7 +60,7 @@ $(document).ready(function() {
     $("#join").attr('disabled', 'disabled');
   }
 
-  //enter screen
+  //
   $("#nameForm").submit(function() {
     var name = $("#name").val();
     var device = "desktop";
@@ -133,7 +90,7 @@ $(document).ready(function() {
     }
   });
 
-  //main chat screen
+  //la fenetre du chat
   $("#chatForm").submit(function() {
     var msg = $("#msg").val();
     if (msg !== "") {
@@ -142,7 +99,7 @@ $(document).ready(function() {
     }
   });
 
-  //'is typing' message
+  //'un user est entrain de écrir 
   var typing = false;
   var timeout = undefined;
 
@@ -175,29 +132,6 @@ $(document).ready(function() {
   });
 
 
-/*
-  $("#msg").keypress(function(){
-    if ($("#msg").is(":focus")) {
-      if (myRoomID !== null) {
-        socket.emit("isTyping");
-      }
-    } else {
-      $("#keyboard").remove();
-    }
-  });
-
-  socket.on("isTyping", function(data) {
-    if (data.typing) {
-      if ($("#keyboard").length === 0)
-        $("#updates").append("<li id='keyboard'><span class='text-muted'><i class='fa fa-keyboard-o'></i>" + data.person + " is typing.</li>");
-    } else {
-      socket.emit("clearMessage");
-      $("#keyboard").remove();
-    }
-    console.log(data);
-  });
-*/
-
   $("#showCreateRoom").click(function() {
     $("#createRoomForm").toggle();
   });
@@ -212,7 +146,7 @@ $(document).ready(function() {
           $("#errors").show();
           $("#errors").append("Room <i>" + roomName + "</i> already exists");
         } else {      
-        if (roomName.length > 0) { //also check for roomname
+        if (roomName.length > 0) { 
           socket.emit("createRoom", roomName);
           $("#errors").empty();
           $("#errors").hide();
@@ -245,56 +179,9 @@ $(document).ready(function() {
     $("#msg").val("w:"+name+":");
     $("#msg").focus();
   });
-/*
-  $("#whisper").change(function() {
-    var peopleOnline = [];
-    if ($("#whisper").prop('checked')) {
-      console.log("checked, going to get the peeps");
-      //peopleOnline = ["Tamas", "Steve", "George"];
-      socket.emit("getOnlinePeople", function(data) {
-        $.each(data.people, function(clientid, obj) {
-          console.log(obj.name);
-          peopleOnline.push(obj.name);
-        });
-        console.log("adding typeahead")
-        $("#msg").typeahead({
-            local: peopleOnline
-          }).each(function() {
-            if ($(this).hasClass('input-lg'))
-              $(this).prev('.tt-hint').addClass('hint-lg');
-        });
-      });
-      
-      console.log(peopleOnline);
-    } else {
-      console.log('remove typeahead');
-      $('#msg').typeahead('destroy');
-    }
-  });
-  // $( "#whisper" ).change(function() {
-  //   var peopleOnline = [];
-  //   console.log($("#whisper").prop('checked'));
-  //   if ($("#whisper").prop('checked')) {
-  //     console.log("checked, going to get the peeps");
-  //     peopleOnline = ["Tamas", "Steve", "George"];
-  //     // socket.emit("getOnlinePeople", function(data) {
-  //     //   $.each(data.people, function(clientid, obj) {
-  //     //     console.log(obj.name);
-  //     //     peopleOnline.push(obj.name);
-  //     //   });
-  //     // });
-  //     //console.log(peopleOnline);
-  //   }
-  //   $("#msg").typeahead({
-  //         local: peopleOnline
-  //       }).each(function() {
-  //         if ($(this).hasClass('input-lg'))
-  //           $(this).prev('.tt-hint').addClass('hint-lg');
-  //       });
-  // });
-*/
 
-//socket-y stuff
+
+
 socket.on("exists", function(data) {
   $("#errors").empty();
   $("#errors").show();
@@ -309,7 +196,7 @@ socket.on("joined", function() {
     navigator.geolocation.getCurrentPosition(positionSuccess, positionError, { enableHighAccuracy: true });
   } else {
     $("#errors").show();
-    $("#errors").append("Your browser is ancient and it doesn't support GeoLocation.");
+    $("#errors").append("votre navigateur ne supporte pas la géolocalisation.");
   }
   function positionError(e) {
     console.log(e);
@@ -318,7 +205,7 @@ socket.on("joined", function() {
   function positionSuccess(position) {
     var lat = position.coords.latitude;
     var lon = position.coords.longitude;
-    //consult the yahoo service
+    //utiliser le service de yahoo pour savoir le pays de l'utilisateur
     $.ajax({
       type: "GET",
       url: "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20geo.placefinder%20where%20text%3D%22"+lat+"%2C"+lon+"%22%20and%20gflags%3D%22R%22&format=json",
@@ -332,12 +219,12 @@ socket.on("joined", function() {
 
 socket.on("history", function(data) {
   if (data.length !== 0) {
-    $("#msgs").append("<li><strong><span class='text-warning'>Last 10 messages:</li>");
+    $("#msgs").append("<li><strong><span class='text-warning'>Les derniers 10 messages:</li>");
     $.each(data, function(data, msg) {
       $("#msgs").append("<li><span class='text-warning'>" + msg + "</span></li>");
     });
   } else {
-    $("#msgs").append("<li><strong><span class='text-warning'>No past messages in this room.</li>");
+    $("#msgs").append("<li><strong><span class='text-warning'>.</li>");
   }
 });
 
@@ -346,9 +233,9 @@ socket.on("history", function(data) {
   });
 
   socket.on("update-people", function(data){
-    //var peopleOnline = [];
+    
     $("#people").empty();
-    $('#people').append("<li class=\"list-group-item active\">People online <span class=\"badge\">"+data.count+"</span></li>");
+    $('#people').append("<li class=\"list-group-item active\">Utilisateurs connectés <span class=\"badge\">"+data.count+"</span></li>");
     $.each(data.people, function(a, obj) {
       if (!("country" in obj)) {
         html = "";
@@ -356,24 +243,15 @@ socket.on("history", function(data) {
         //afficher le drapeau du pays (pour plus d'info https://www.flag-sprites.com/)
         html = "<img class=\"flag flag-"+obj.country+"\"/>";
       }
-      $('#people').append("<li class=\"list-group-item\"><span>" + obj.name + "</span> <i class=\"fa fa-"+obj.device+"\"></i> " + html + " <a href=\"#\" class=\"whisper btn btn-xs\">whisper</a></li>");
-      //peopleOnline.push(obj.name);
+      $('#people').append("<li class=\"list-group-item\"><span>" + obj.name + "</span> <i class=\"fa fa-"+obj.device+"\"></i> " + html + " <a href=\"#\" class=\"whisper btn btn-xs\">chatPrivé</a></li>");
+      
     });
-
-    /*var whisper = $("#whisper").prop('checked');
-    if (whisper) {
-      $("#msg").typeahead({
-          local: peopleOnline
-      }).each(function() {
-         if ($(this).hasClass('input-lg'))
-              $(this).prev('.tt-hint').addClass('hint-lg');
-      });
-    }*/
+   
   });
 
   socket.on("chat", function(msTime, person, msg) {
     $("#msgs").append("<li><strong><span class='text-success'>" + timeFormat(msTime) + person.name + "</span></strong>: " + msg + "</li>");
-    //clear typing field
+
      $("#"+person.name+"").remove();
      clearTimeout(timeout);
      timeout = setTimeout(timeoutFunction, 0);
@@ -381,23 +259,23 @@ socket.on("history", function(data) {
 
   socket.on("private", function(msTime, person, msg) {
     if (person.name === "You") {
-      s = "whisper"
+      s = "msgPrivé"
     } else {
-      s = "whispers"
+      s = "msgPrivé"
     }
     $("#msgs").append("<li><strong><span class='text-muted'>" + timeFormat(msTime) + person.name + "</span></strong> "+s+": " + msg + "</li>");
   });
 
   socket.on("roomList", function(data) {
     $("#rooms").text("");
-    $("#rooms").append("<li class=\"list-group-item active\">List of rooms <span class=\"badge\">"+data.count+"</span></li>");
+    $("#rooms").append("<li class=\"list-group-item active\">Les chatrooms <span class=\"badge\">"+data.count+"</span></li>");
      if (!jQuery.isEmptyObject(data.rooms)) { 
       $.each(data.rooms, function(id, room) {
-        var html = "<button id="+id+" class='joinRoomBtn btn btn-default btn-xs' >Join</button>" + " " + "<button id="+id+" class='removeRoomBtn btn btn-default btn-xs'>Remove</button>";
+        var html = "<button id="+id+" class='joinRoomBtn btn btn-default btn-xs' >Joindre</button>" + " " + "<button id="+id+" class='removeRoomBtn btn btn-default btn-xs'>Supprimer</button>";
         $('#rooms').append("<li id="+id+" class=\"list-group-item\"><span>" + room.name + "</span> " + html + "</li>");
       });
     } else {
-      $("#rooms").append("<li class=\"list-group-item\">There are no rooms yet.</li>");
+      $("#rooms").append("<li class=\"list-group-item\">Il n'y pas de chatroom :( .</li>");
     }
   });
 
@@ -406,7 +284,7 @@ socket.on("history", function(data) {
   });
 
   socket.on("disconnect", function(){
-    $("#msgs").append("<li><strong><span class='text-warning'>The server is not available</span></strong></li>");
+    $("#msgs").append("<li><strong><span class='text-warning'>Le serveur n'est pas trouvé</span></strong></li>");
     $("#msg").attr("disabled", "disabled");
     $("#send").attr("disabled", "disabled");
   });
