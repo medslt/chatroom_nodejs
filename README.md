@@ -12,6 +12,7 @@
 </ul>
 
 # Fonctionnalités
+<p>Une application de chat qui permet :</p>
 <ul>
   <li>Connecter avec un username</li>
   <li>Le username est unique - sinon une suggestion d'un autre username</li>
